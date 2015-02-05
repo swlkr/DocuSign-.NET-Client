@@ -435,41 +435,15 @@ namespace DocuSignNuGetSamples
             // assign the envelope id that was passed in
             envelope.EnvelopeId = EnvelopeId;
 
-            // add one signer (single recipient embedded signing currently supported in DocuSign .NET Client)
-            envelope.Recipients = new Recipients()
-            {
-                signers = new Signer[]
-                {
-                    new Signer()
-                    {
-                        email = RecipientEmail,
-                        name = RecipientName,
-                        recipientId = "1"
-                    }
-                }
-            };
+            var signer = new Signer();
+            signer.email = RecipientEmail;
+            signer.name = RecipientName;
+            signer.clientUserId = "1";
 
             // generate the recipient view token
-            result = envelope.GetRecipientView("http://www.nuget.org/packages/DocuSign.Integration.Client.dll/");
+            var url = envelope.GetEmbeddedSignerView("http://www.nuget.org/packages/DocuSign.Integration.Client.dll/", signer);
 
-            if (!result)
-            {
-                if (envelope.RestError != null)
-                {
-                    Console.WriteLine("Error code:  {0}\nMessage:  {1}", envelope.RestError.errorCode, envelope.RestError.message);
-                    return;
-                }
-                else
-                {
-                    Console.WriteLine("Error encountered retrieving signing token, please review your envelope and recipient data.");
-                    return;
-                }
-            }
-            else
-            {
-                // open the recipient view (SenderViewUrl field is re-used for the recipient URL)
-                Process.Start(envelope.SenderViewUrl);
-            }
+            Process.Start(url);
         }
 
         //==========================================================================================
